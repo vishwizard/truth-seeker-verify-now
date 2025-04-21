@@ -1,7 +1,5 @@
 
-// This is a placeholder verification service that would be replaced with actual API calls
-// to a backend verification service in a full MERN implementation
-
+// Import to use fetch and possibly define types
 export type VerificationResult = {
   isTrue: boolean | null;
   confidence: number;
@@ -9,35 +7,116 @@ export type VerificationResult = {
   sources?: string[];
 };
 
-// Placeholder function that simulates verification
-export const verifyText = async (text: string): Promise<VerificationResult> => {
-  // In a real implementation, this would call a backend API
-  // For now, this is just a placeholder with some simple logic
-  
-  await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API delay
-  
-  const lowercaseText = text.toLowerCase();
-  
-  // Very simple logic for demo purposes only
-  if (lowercaseText.includes("false") || lowercaseText.includes("fake")) {
-    return {
-      isTrue: false,
-      confidence: 0.85,
-      explanation: "This information contains terms often associated with false news. In a real implementation, we would use AI and fact-checking databases to verify this claim.",
-      sources: ["https://example.com/fact-check-1"]
+// Define the Gemini API endpoint
+const GEMINI_API_URL = "https://api.perplexity.ai/chat/completions";
+
+type GeminiResponse = {
+  choices: Array<{
+    message: {
+      role: string;
+      content: string;
     };
-  } else if (lowercaseText.includes("true") || lowercaseText.includes("fact")) {
+  }>;
+};
+
+// Helper to parse Gemini's response content and convert it into VerificationResult
+const parseGeminiResponse = (content: string): VerificationResult => {
+  // This parsing logic depends on how Gemini responds.
+  // For demonstration, expect content as JSON string or a specific formatted string.
+  // We'll try to parse JSON first, if fails fallback to a default unknown
+
+  try {
+    const parsed = JSON.parse(content);
+
+    // Expected keys: isTrue, confidence, explanation, sources
     return {
-      isTrue: true,
-      confidence: 0.82,
-      explanation: "This information seems to contain factual indicators. In a real implementation, we would verify this against trusted sources.",
-      sources: ["https://example.com/fact-check-2"]
+      isTrue:
+        typeof parsed.isTrue === "boolean"
+          ? parsed.isTrue
+          : parsed.isTrue === "true"
+          ? true
+          : parsed.isTrue === "false"
+          ? false
+          : null,
+      confidence:
+        typeof parsed.confidence === "number"
+          ? parsed.confidence
+          : 0.5,
+      explanation:
+        typeof parsed.explanation === "string"
+          ? parsed.explanation
+          : "",
+      sources:
+        Array.isArray(parsed.sources)
+          ? parsed.sources
+          : [],
     };
-  } else {
+  } catch {
+    // If no JSON, fallback to default: treat as unknown with explanation in content
     return {
       isTrue: null,
       confidence: 0.5,
-      explanation: "Unable to determine the truthfulness with confidence. More context or information would be needed for proper verification.",
+      explanation: content,
+      sources: [],
     };
   }
+};
+
+// Updated verifyText function that uses Gemini API
+export const verifyText = async (
+  text: string,
+  apiKey: string
+): Promise<VerificationResult> => {
+  // Prepare the request body
+  const requestBody = {
+    model: "llama-3.1-sonar-small-128k-online",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a fact verification assistant. Reply strictly in JSON format with fields: isTrue (true/false/null), confidence (0 to 1), explanation (string), sources (array of URLs).",
+      },
+      {
+        role: "user",
+        content: `Verify the following claim for truthfulness and provide your response in the requested JSON format:\n${text}`,
+      },
+    ],
+    temperature: 0.2,
+    top_p: 0.9,
+    max_tokens: 1000,
+    return_images: false,
+    return_related_questions: false,
+    search_domain_filter: ["perplexity.ai"],
+    search_recency_filter: "month",
+    frequency_penalty: 1,
+    presence_penalty: 0,
+  };
+
+  const response = await fetch(GEMINI_API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Gemini API error: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  const data: GeminiResponse = await response.json();
+
+  if (!data.choices || data.choices.length === 0) {
+    throw new Error("Gemini API did not return any choices");
+  }
+
+  // Extract response text
+  const content = data.choices[0].message.content;
+
+  // Parse the response content to our VerificationResult type
+  return parseGeminiResponse(content);
 };
