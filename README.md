@@ -1,73 +1,70 @@
-# Welcome to your Lovable project
 
-## Project info
+# TruthSeeker News Verification App
 
-**URL**: https://lovable.dev/projects/24a8086d-3a2d-4df5-ba1d-010b9951dcd1
+A modern application for verifying the accuracy of news and information using the MERN stack (MongoDB, Express, React, and Node.js).
 
-## How can I edit this code?
+## Frontend (Current Implementation)
 
-There are several ways of editing your application.
+The current implementation includes a fully functional React frontend with:
 
-**Use Lovable**
+- A clean, user-friendly interface for submitting text for verification
+- Result display with visual indicators for true/false/unverified information
+- Confidence scoring and explanation display
+- Placeholder verification logic (frontend only)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/24a8086d-3a2d-4df5-ba1d-010b9951dcd1) and start prompting.
+## Backend Implementation (Next Steps)
 
-Changes made via Lovable will be committed automatically to this repo.
+To complete the MERN stack implementation, you'll need to:
 
-**Use your preferred IDE**
+1. **Set up MongoDB**
+   - Create a MongoDB Atlas account or run MongoDB locally
+   - Set up a database for storing verification results and user data
+   - Create collections for `verifications`, `users`, and `sources`
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. **Create Express.js Backend**
+   - Create a new Node.js project with Express
+   - Set up middleware for CORS, body parsing, etc.
+   - Implement authentication (optional)
+   - Create API routes for verification
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+3. **Backend API Endpoints**
+   - `POST /api/verify` - Submit text for verification
+   - `GET /api/verifications` - Get past verifications
+   - `GET /api/sources` - Get trusted sources
 
-Follow these steps:
+4. **Integration with AI/ML Services**
+   - Connect to fact-checking APIs (e.g., Google Fact Check Tools)
+   - Implement NLP for text analysis
+   - Train/use ML models for verification
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Connecting Frontend to Backend
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+To connect this frontend to your backend:
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. Update the `apiService.ts` file to make real API calls to your Express backend
+2. Replace the placeholder verification logic in `verificationService.ts` with calls to your API
+3. Add environment variables for your API URL
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## Getting Started with the Frontend
+
+```bash
+# Install dependencies
+npm install
+
+# Run the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Technologies Used
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Frontend**: React, TypeScript, TailwindCSS
+- **Backend (to be implemented)**: Node.js, Express.js
+- **Database (to be implemented)**: MongoDB
+- **Authentication (optional)**: JWT
 
-**Use GitHub Codespaces**
+## Future Enhancements
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/24a8086d-3a2d-4df5-ba1d-010b9951dcd1) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- User accounts and history
+- Browser extension for real-time verification
+- Source reliability scoring
+- Social media integration
